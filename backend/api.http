@@ -1,7 +1,54 @@
+POST http://localhost:5000/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "asad123",
+    "email": "asad@gmail.com",
+    "password": "asad123",
+    "name": "asad"
+}
+
+###
 POST http://localhost:5000/login HTTP/1.1
 Content-Type: application/json
 
 {
-    "password": "mypassword",
-    "email": "kashif@example.com"
+    "email":"asad@gmail.com",
+    "password": "asad123"
 }
+
+
+###
+GET http://localhost:5000/get_user_and_profile HTTP/1.1
+Content-Type: application/json
+
+{
+    "token": "6d826689c00fdd102bc9d65fa151e67b87d7ed5955ebcb8604c23ea7bd061ce7"
+}
+
+###
+POST http://localhost:5000/update_profile_data HTTP/1.1
+Content-Type: application/json
+
+{
+  "token": "6d826689c00fdd102bc9d65fa151e67b87d7ed5955ebcb8604c23ea7bd061ce7",
+  "bio": "my name is asad ali",
+  "currentPost": "manager",
+  "postWork": [
+    {
+        "company": "Google",
+        "position": "Manager",
+        "years": "3"
+    }
+  ],
+  "education": [
+    {
+        "school": "Superior",
+        "degree": "Bachelor",
+        "fielOfStudy": "2021-2022"
+    }
+  ]
+}
+
+###
+POST http://localhost:5000/get_all_profile 
