@@ -32,7 +32,15 @@ const PostSchema = mongoose.Schema({
     fileType:{
         type: String,
         default: ''
-    }
+    },
+
+    // ✅ Add this
+    comments: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Comment"
+        }
+    ]
 });
 
 const Post = mongoose.model("Post", PostSchema);

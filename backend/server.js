@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './routes/user.routes.js'
+import postRoutes from './routes/posts.routes.js';
+
 
 dotenv.config();
 
@@ -13,6 +15,8 @@ app.use(cors());
 app.use(express.static("uploads"));
 
 app.use(userRoutes);
+app.use(postRoutes); 
+
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI)

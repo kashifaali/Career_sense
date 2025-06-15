@@ -5,6 +5,8 @@ import crypto from 'crypto';
 import PDFDocument from 'pdfkit';
 import fs from "fs";
 import connections from "../models/connections.model.js";
+import Post from "../models/posts.model.js";
+
 
 
 
@@ -37,6 +39,7 @@ const converUserDataToPDF = (userData)=>{
 }
 
 export const register = async (req, res)=>{
+  
     try{
         const {name, email, password, username} = req.body;
         if(!name || !email || !password || !name){return res.send(400).json({message: "all fields are required"})}
@@ -62,7 +65,8 @@ const profile = new Profile({userId: newuser._id});
 
 await profile.save(); 
 
-        return res.send({message: "user created successfully"});
+        return res.status(201).json({ message: "User created successfully", user: newuser });
+
     }
     catch(error){
         return res.status(500).json({message: error.message});
@@ -160,7 +164,7 @@ export const updateProfilePicture = async(req,res)=>{
 
 export const getUserProfile = async(req,res)=>{
   try{
-    const {token} = req.body;
+    const {token} = req.query;
     const user = await User.findOne({token: token});
 
     if(!user){
@@ -337,59 +341,9 @@ export const acceptConnectionRequest = async (req,res)=>{
   }
 }
 
-export const commentPost = async (req, res)=>{
-  const {token, post_id, commentBody} = req.body;
-
-  try{
-    const user = await User.findOne({token: token}).select("_id");
-
-    if(!user){
-      return res.status(404).json({message: "user not found"})
-    }
-
-    const post = await Post.findOne({
-      _id: post_id
-    });
-
-     if(!post){
-            return res.status(404).json({message: "post not found"})
-        }
-
-      const comment = new Comment({
-        userId: user._id,
-        postId: post_id,
-        comment: commentBody
-      });
-
-      await comment.save();
-
-      return res.status(200).json({message: "comment added"})
 
 
 
-  }
-  catch(error){
-  return res.status(500).json({ message: error.message });
-  }
-}
-
-export const get_comments_by_post = async (req,res)=>{
-  const {post_id} = req.body;
-
-  try{
-    const post = await Post.findOne({_id: post_id});
-
-    if(!post){
-      return res.status(404).json({message: "post not found"})
-    }
-
-    return res.json({comments: post.comments})
-  }
-
-  catch(error){
-  return res.status(500).json({ message: error.message });
-  }
-}
 
 
 export const increment_likes = async (req,res)=>{
