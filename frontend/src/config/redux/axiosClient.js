@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const clientServer = axios.create({
-  baseURL: 'https://career-sense.onrender.com',
+  baseURL: 'http://localhost:5000', // for local dev
   headers: { 'Content-Type': 'application/json' }
 });
 

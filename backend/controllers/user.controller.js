@@ -4,7 +4,7 @@ import bcyrpt from 'bcrypt';
 import crypto from 'crypto';
 import PDFDocument from 'pdfkit';
 import fs from "fs";
-import connections from "../models/connections.model.js";
+import Connection from "../models/connections.model.js";
 import Post from "../models/posts.model.js";
 
 
@@ -137,16 +137,15 @@ export const updateProfilePicture = async(req,res)=>{
     }
 
     const {username, email} = newUserData;
+const existingUser = await User.findOne({
+  $or: [{username}, {email}],
+  _id: { $ne: user._id } // exclude current user
+});
 
-    const existingUser = await User.find({$or: [{username}, {email}]});
+if (existingUser) {
+  return res.status(400).json({ message: "User already exists" });
+}
 
-    if(existingUser){
-      if(existingUser || String(existingUser._id) !== String(user._id)){
-
-      return res.send(400).json({message: "User already exist"});
-
-      }
-    }
 
     Object.assign(user, newUserData);
     await user.save();
@@ -209,14 +208,19 @@ export const getAllUserProfile = async(req,res)=>{
   try{
     const profiles = await Profile.find().populate('userId', 'name username email profilePicture');
     return res.json({profiles});
+    // console.log(profiles);
   }
   catch(error){
   return res.status(500).json({ message: error.message });
+  
   }
 }
 
+
+
 export const downloadProfile = async (req,res)=>{
-  const user_id = req.query.id;
+  const user_id = req.query.user_id;
+  console.log(user_id);
   const userProfile = await Profile.findOne({userId: user_id})
   .populate('userId', 'name username email profilePicture');
 
@@ -235,7 +239,8 @@ export const sendConnectionRequest = async (req,res)=>{
       return res.status(404).json({message: "user not found"})
     }
 
-    const connectionUser = await User.findOne({_id: connectoinId});
+    const connectionUser = await User.findOne({_id: connectionId});
+
 
     if(!connectionUser){
       return res.status(404).json({message: "connection User not found"})
@@ -270,7 +275,7 @@ export const sendConnectionRequest = async (req,res)=>{
 
 
 export const getMyConnectionRequests = async (req,res)=>{
-  const {token} = req.body;
+  const {token} = req.query;
 
   try{
     const user = await User.findOne({token});
@@ -279,7 +284,7 @@ export const getMyConnectionRequests = async (req,res)=>{
       return res.status(404).json({message: "user not found"})
     }
 
-    const connection = await connections.find({userId: user._id})
+const connection = await Connection.find({userId: user._id})
     .populate('connectionId','name username email profilePicture');
 
     return res.json({connection})
@@ -300,7 +305,7 @@ export const whatAreMyConnections = async (req,res)=>{
       return res.status(404).json({message: "user not found"})
     }
 
-    const connection = await connections.find({connectionId: user._id})
+    const connection = await Connection.find({connectionId: user._id})
     .populate('userId', 'name username email profilePicture');
 
     return res.json(connection);
@@ -320,13 +325,13 @@ export const acceptConnectionRequest = async (req,res)=>{
       return res.status(404).json({message: "user not found"})
     }
 
-    const connection = await connections.findOne({_id: requestId});
+const connection = await Connection.findOne({_id: requestId});
 
     if(!connection){
       return res.status(404).json({message:"connection not found"})
     }
 
-    if(action.type === "accept"){
+if(action_type === "accept"){
       connection.status_accepted = true;
     }
     else{
@@ -366,3 +371,32 @@ export const increment_likes = async (req,res)=>{
   return res.status(500).json({ message: error.message });
   }
 }
+
+
+export const getUserprofilebasedonusername = async(req,res)=>{
+  
+  const {username} = req.query;
+  
+  try{
+    const user = await User.findOne({
+      username
+    });
+
+    if(!user){
+      return res.status(404).json({message: "user not found"})
+    }
+
+    const userProfile = await Profile.findOne({userId: user._id})
+    .populate('userId', 'name username email profilePicture');
+
+    return res.json({"profile" : userProfile})
+  }
+  catch(err){
+    return res.status(500).json({message: err.message});
+  }
+}
+
+
+
+
+
